@@ -1,20 +1,13 @@
 import { Component, createElement } from "react";
 import { BadgeButton, BadgeButtonProps } from "./components/BadgeButton";
-import { Alert } from "./components/Alert";
-import BadgeButtonContainer, { BadgeButtonContainerProps } from "./components/BadgeButtonContainer";
+import { BadgeButtonContainerProps } from "./components/BadgeButtonContainer";
 
 declare function require(name: string): string;
-
-type VisibilityMap = {
-    [P in keyof BadgeButtonContainerProps]: boolean;
-};
 
 // tslint:disable-next-line class-name
 export class preview extends Component<BadgeButtonContainerProps, {}> {
     render() {
-        const message = BadgeButtonContainer.validateProps(this.props);
         return createElement("div", { ref: this.parentInline },
-            createElement(Alert, { bootstrapStyle: "danger", className: "widget-badge-button-alert", message }),
             createElement(BadgeButton, this.transformProps(this.props))
         );
     }
@@ -27,26 +20,21 @@ export class preview extends Component<BadgeButtonContainerProps, {}> {
     }
 
     private transformProps(props: BadgeButtonContainerProps): BadgeButtonProps {
-        const valueAttributeArray = props.valueAttribute ? props.valueAttribute.split(".")[2] : "";
+        const valueAttributeArray = props.valueAttribute ? props.valueAttribute.value : "";
         return {
             bootstrapStyle: props.bootstrapStyle,
             className: props.class,
-            label: props.label,
-            style: BadgeButtonContainer.parseStyle(props.style),
-            value: valueAttributeArray ? "[" + valueAttributeArray + "]" : props.badgeButtonValue
+            label: props.label ? props.label.value : "",
+            style: props.style,
+            value: valueAttributeArray
+                ? "[" + valueAttributeArray + "]"
+                : props.badgeButtonValue
+                    ? props.badgeButtonValue.value
+                    : ""
         };
     }
 }
 
 export function getPreviewCss() {
     return require("./ui/BadgeButton.css");
-}
-
-export function getVisibleProperties(props: BadgeButtonContainerProps, visibilityMap: VisibilityMap) {
-    visibilityMap.microflow = props.onClickEvent === "callMicroflow";
-    visibilityMap.nanoflow = props.onClickEvent === "callNanoflow";
-    visibilityMap.page = props.onClickEvent === "showPage";
-    visibilityMap.openPageAs = props.onClickEvent === "showPage";
-
-    return visibilityMap;
 }
