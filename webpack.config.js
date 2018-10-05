@@ -1,11 +1,10 @@
-const webpack = require("webpack");
 const path = require("path");
+const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
-
-const pkg = require("./package");
-const widgetName = pkg.widgetName;
-const name = pkg.widgetName.toLowerCase();
+const package = require("./package");
+const widgetName = package.widgetName;
+const name = package.widgetName.toLowerCase();
 
 const widgetConfig = {
     entry: `./src/components/${widgetName}Container.ts`,
@@ -15,7 +14,7 @@ const widgetConfig = {
         libraryTarget: "umd"
     },
     resolve: {
-        extensions: [ ".ts", ".js", ".json" ],
+        extensions: [ ".ts", ".js" ],
         alias: {
             "tests": path.resolve(__dirname, "./tests")
         }
@@ -26,27 +25,16 @@ const widgetConfig = {
             { test: /\.css$/, loader: ExtractTextPlugin.extract({
                 fallback: "style-loader",
                 use: "css-loader"
-            }) },
-            { test: /\.scss$/, loader: ExtractTextPlugin.extract({
-                fallback: "style-loader",
-                use: "css-loader!sass-loader"
             }) }
         ]
     },
+    mode: "development",
     devtool: "source-map",
     externals: [ "react", "react-dom" ],
     plugins: [
-        new CopyWebpackPlugin([
-            { from: "src/**/*.js" },
-            { from: "src/**/*.xml" },
-            { from: "src/**/*.png", to: `src/com/mendix/widget/custom/${name}/` }
-        ], {
-            copyUnmodified: true
-        }),
+        new CopyWebpackPlugin([ { from: "src/**/*.xml" } ], { copyUnmodified: true }),
         new ExtractTextPlugin({ filename: `./src/com/mendix/widget/custom/${name}/ui/${widgetName}.css` }),
-        new webpack.LoaderOptionsPlugin({
-            debug: true
-        })
+        new webpack.LoaderOptionsPlugin({ debug: true })
     ]
 };
 
@@ -69,16 +57,16 @@ const previewConfig = {
             }},
             { test: /\.css$/, use: "raw-loader" },
             { test: /\.scss$/, use: [
-                { loader: "raw-loader" },
-                { loader: "sass-loader" }
-            ] }
+                    { loader: "raw-loader" },
+                    { loader: "sass-loader" }
+                ]
+            }
         ]
     },
+    mode: "development",
     devtool: "inline-source-map",
     externals: [ "react", "react-dom" ],
-    plugins: [
-        new webpack.LoaderOptionsPlugin({ debug: true })
-    ]
+    plugins: [ new webpack.LoaderOptionsPlugin({ debug: true }) ]
 };
 
 module.exports = [ widgetConfig, previewConfig ];
